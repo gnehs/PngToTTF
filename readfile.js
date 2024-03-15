@@ -11,7 +11,7 @@ const inputFolder = "pico"; // 包含SVG檔案的資料夾路徑
 const fontStream = new SVGIcons2SVGFontStream({
   fontName: fontName,
 });
-
+fs.mkdirSync("final_font", { recursive: true });
 const files = fs.readdirSync(inputFolder);
 
 const progressBar = new ProgressBar("[:bar] :percent :etas", {
@@ -19,38 +19,46 @@ const progressBar = new ProgressBar("[:bar] :percent :etas", {
   width: 40,
 });
 
-console.time("Font Generation Time");
+function generateSvgFont() {
+  return new Promise((resolve, reject) => {
+    console.time("Font Generation Time");
+    fontStream
+      .pipe(fs.createWriteStream(outputSVGFontPath))
+      .on("finish", function () {
+        console.log("\nFont successfully created!");
+        console.timeEnd("Font Generation Time");
+        resolve();
+      })
+      .on("error", function (err) {
+        reject(err);
+      });
 
-fontStream
-  .pipe(fs.createWriteStream(outputSVGFontPath))
-  .on("finish", function () {
-    console.log("\nFont successfully created!");
-    console.timeEnd("Font Generation Time");
-  })
-  .on("error", function (err) {
-    console.error(err);
+    files.forEach((file) => {
+      if (path.extname(file) === ".svg") {
+        // 從檔名中提取Unicode
+        const unicodeMatch = file.match(/U\+([0-9A-Fa-f]+)/);
+        if (unicodeMatch) {
+          const unicode = [String.fromCodePoint(parseInt(unicodeMatch[1], 16))];
+          const name = "icon_" + unicodeMatch[1]; // 使用Unicode的十六進位表示作為名稱
+          const glyph = fs.createReadStream(path.join(inputFolder, file));
+          glyph.metadata = { unicode, name };
+          fontStream.write(glyph);
+        }
+      }
+      progressBar.tick();
+    });
+    // 結束流
+    fontStream.end();
   });
+}
 
-files.forEach((file) => {
-  if (path.extname(file) === ".svg") {
-    // 從檔名中提取Unicode
-    const unicodeMatch = file.match(/U\+([0-9A-Fa-f]+)/);
-    if (unicodeMatch) {
-      const unicode = [String.fromCodePoint(parseInt(unicodeMatch[1], 16))];
-      const name = "icon_" + unicodeMatch[1]; // 使用Unicode的十六進位表示作為名稱
-      const glyph = fs.createReadStream(path.join(inputFolder, file));
-      glyph.metadata = { unicode, name };
-      fontStream.write(glyph);
-    }
-  }
-  progressBar.tick();
-});
-
-// 結束流
-fontStream.end();
-
-// 將SVG字體轉換為TTF字體
-const svgFont = fs.readFileSync(outputSVGFontPath, "utf8");
-const ttfFont = svg2ttf(svgFont, {});
-fs.writeFileSync("final_font/fontpico.ttf", new Buffer.from(ttfFont.buffer));
-fs.unlinkSync(outputSVGFontPath); // 刪除中間產生的SVG字體檔案
+async function main() {
+  await generateSvgFont();
+  // 將SVG字體轉換為TTF字體
+  const svgFont = fs.readFileSync(outputSVGFontPath, "utf8");
+  const ttfFont = svg2ttf(svgFont, {});
+  fs.writeFileSync("final_font/fontpico.ttf", new Buffer.from(ttfFont.buffer));
+  fs.unlinkSync(outputSVGFontPath); // 刪除中間產生的SVG字體檔案
+  console.log("TTF font successfully created!");
+}
+main();
