@@ -2,7 +2,7 @@ const SVGIcons2SVGFontStream = require("svgicons2svgfont");
 const svg2ttf = require("svg2ttf");
 const fs = require("graceful-fs");
 const path = require("path");
-const ProgressBar = require("progress");
+const ttf2woff2 = require("ttf2woff2");
 
 const fontName = "MyFont";
 const outputSVGFontPath = "final_font/fontpico.svg"; // 輸出SVG字體的路徑
@@ -13,11 +13,6 @@ const fontStream = new SVGIcons2SVGFontStream({
 });
 fs.mkdirSync("final_font", { recursive: true });
 const files = fs.readdirSync(inputFolder);
-
-const progressBar = new ProgressBar("[:bar] :percent :etas", {
-  total: files.length,
-  width: 40,
-});
 
 function generateSvgFont() {
   return new Promise((resolve, reject) => {
@@ -45,7 +40,6 @@ function generateSvgFont() {
           fontStream.write(glyph);
         }
       }
-      progressBar.tick();
     });
     // 結束流
     fontStream.end();
@@ -54,11 +48,20 @@ function generateSvgFont() {
 
 async function main() {
   await generateSvgFont();
+  console.log("Converting SVG font to TTF...");
   // 將SVG字體轉換為TTF字體
   const svgFont = fs.readFileSync(outputSVGFontPath, "utf8");
   const ttfFont = svg2ttf(svgFont, {});
-  fs.writeFileSync("final_font/fontpico.ttf", new Buffer.from(ttfFont.buffer));
-  fs.unlinkSync(outputSVGFontPath); // 刪除中間產生的SVG字體檔案
+  fs.writeFileSync(
+    `final_font/${fontName}.ttf`,
+    new Buffer.from(ttfFont.buffer)
+  );
   console.log("TTF font successfully created!");
+  fs.unlinkSync(outputSVGFontPath); // 刪除中間產生的SVG字體檔案
+  fs.writeFileSync(
+    `final_font/${fontName}.woff2`,
+    ttf2woff2(new Uint8Array(ttfFont.buffer))
+  );
+  console.log("WOFF2 font successfully created!");
 }
 main();

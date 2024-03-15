@@ -55,30 +55,16 @@ node run_pico.js
 | --------------------------------------------- | --------------------------------------------- | --------------------------------------------- |
 | ![](https://hackmd.io/_uploads/S1GL40HMp.png) | ![](https://hackmd.io/_uploads/ByWUBABfT.png) | ![](https://hackmd.io/_uploads/H16kBRrfa.png) |
 
-### SVG ---> SVG (打包成一個 SVG 檔)
+### SVG ---> SVG (打包成一個 SVG 檔) ---> TTF & WOFF2
 
 > 套件來源：https://www.npmjs.com/package/svgicons2svgfont
 
 這個步驟跟 https://chiaoooo.github.io/font-svg-viewer/ 不同的地方是不採取替換再打包的方法，而是直接打包現有的 svg 檔，節省空間及時間 ( 31026 kb 縮小至 9252 kb / 12 小時縮短至 2 分鐘 )。
 
 ```
-node readfile.js
+node generate_fontfile.js
 ```
 
-- 完成以後會在 final_font 裡面看到 fontpico.svg，將它丟入 FontForge 內並完成後續設定。
-
-### SVG ---> TTF
-
-進入 FontForge 以後可以看到字不會有黑一塊一塊的，就代表成功了!
-![](https://hackmd.io/_uploads/BJkrfeLGp.png)
-
-- 點選 Element ---> Font info，在這邊可以修改字體名稱
-  ![](https://hackmd.io/_uploads/SkC_aRHGp.png)
-
-- 點選左邊那排的 OS/2 ---> Charsets ---> MS Code Pages 取消 Default 的打勾 ---> 選取 950 ---> ok！
-  ![](https://hackmd.io/_uploads/SygB0CHGa.png)
-
-- 點選 File ---> Generate Fonts 輸出成 ttf 檔（跳出訊息都選 yes / generate）
-  ![](https://hackmd.io/_uploads/rJMZJJLGp.png)
-
 ### 完成 !
+
+- 完成以後會在 final_font 裡面看到 ttf 和 woff2 檔
