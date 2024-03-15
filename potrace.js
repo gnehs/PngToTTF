@@ -5,6 +5,8 @@ const ProgressBar = require("progress");
 const inputDir = path.join(__dirname, "crop_v5");
 const outputDir = path.join(__dirname, "svg_separate");
 
+fs.mkdirSync(outputDir, { recursive: true });
+
 // 讀取資料夾中的所有檔案
 fs.readdir(inputDir, function (err, files) {
   if (err) throw err;
