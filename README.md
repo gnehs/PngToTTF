@@ -1,14 +1,13 @@
 # 打包字體說明書
 
 將切割好的手寫字 png 檔打包成 ttf 檔流程 :dog:
+
 網址：https://github.com/chiaoooo/PngToTTF
 
 ### 下載專案進行轉換
 
 ```
 git clone https://github.com/chiaoooo/PngToTTF
-mkdir svg_separate
-mkdir final_font
 ```
 
 ### 使用下列指令安裝所需套件
